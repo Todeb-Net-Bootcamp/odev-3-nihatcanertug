@@ -1,0 +1,160 @@
+USE [ÖðrenciDB]
+GO
+/****** Object:  UserDefinedFunction [dbo].[CalculateAge]    Script Date: 15.07.2022 18:24:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE FUNCTION [dbo].[CalculateAge] 
+(
+	@birthdate datetime
+)
+RETURNS int
+AS
+BEGIN
+	
+	declare @yas int;
+	set @yas = DATEDIFF(YEAR,@birthdate,GetDate())
+
+	return @yas
+
+END
+GO
+/****** Object:  Table [dbo].[Branþlar]    Script Date: 15.07.2022 18:24:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Branþlar](
+	[BranþId] [int] IDENTITY(1,1) NOT NULL,
+	[Branþ_adý] [varchar](20) NULL,
+ CONSTRAINT [PK_Branþlar] PRIMARY KEY CLUSTERED 
+(
+	[BranþId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Öðretmenler]    Script Date: 15.07.2022 18:24:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Öðretmenler](
+	[ÖðrentmenId] [int] IDENTITY(1,1) NOT NULL,
+	[Ört_Adý] [varchar](20) NULL,
+	[Ört_Soyadý] [varchar](20) NULL,
+	[Ört_TcNo] [varchar](11) NULL,
+	[Ört_Cinsiyet] [varchar](10) NULL,
+	[Ört_DoðumTarihi] [date] NULL,
+	[Ört_BranþId] [int] NULL,
+ CONSTRAINT [PK_Öðretmenler] PRIMARY KEY CLUSTERED 
+(
+	[ÖðrentmenId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  UserDefinedFunction [dbo].[TeacherAndBranch]    Script Date: 15.07.2022 18:24:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE FUNCTION [dbo].[TeacherAndBranch]
+(	
+
+)
+RETURNS TABLE 
+AS
+RETURN 
+(
+
+	SELECT Ogr.Ört_Adý,B.Branþ_adý from Öðretmenler Ogr
+	inner join Branþlar B on Ogr.Ört_BranþId = B.BranþId
+)
+GO
+/****** Object:  Table [dbo].[Öðrenciler]    Script Date: 15.07.2022 18:24:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Öðrenciler](
+	[ÖðrenciId] [int] IDENTITY(1,1) NOT NULL,
+	[Ögr_No] [varchar](4) NULL,
+	[Ögr_Adý] [varchar](20) NULL,
+	[Ögr_Soyadý] [varchar](20) NULL,
+	[Öðr_TcNo] [varchar](11) NULL,
+	[Ögr_Cinsiyet] [varchar](10) NULL,
+	[Ögr_DoðumTarihi] [date] NULL,
+	[Ögr_ÞubeId] [int] NULL,
+ CONSTRAINT [PK_Öðrenciler] PRIMARY KEY CLUSTERED 
+(
+	[ÖðrenciId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Öðretmen_þube]    Script Date: 15.07.2022 18:24:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Öðretmen_þube](
+	[ÖðretmenId] [int] NOT NULL,
+	[ÞubeId] [int] NOT NULL,
+ CONSTRAINT [PK_Öðretmen_þube] PRIMARY KEY CLUSTERED 
+(
+	[ÖðretmenId] ASC,
+	[ÞubeId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Þubeler]    Script Date: 15.07.2022 18:24:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Þubeler](
+	[ÞubeId] [int] IDENTITY(1,1) NOT NULL,
+	[Þube_Adý] [varchar](10) NULL,
+ CONSTRAINT [PK_Þubeler] PRIMARY KEY CLUSTERED 
+(
+	[ÞubeId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[Öðrenciler]  WITH CHECK ADD  CONSTRAINT [FK_Öðrenciler_Þubeler] FOREIGN KEY([Ögr_ÞubeId])
+REFERENCES [dbo].[Þubeler] ([ÞubeId])
+GO
+ALTER TABLE [dbo].[Öðrenciler] CHECK CONSTRAINT [FK_Öðrenciler_Þubeler]
+GO
+ALTER TABLE [dbo].[Öðretmen_þube]  WITH CHECK ADD  CONSTRAINT [FK_Öðretmen_þube_Öðretmenler] FOREIGN KEY([ÖðretmenId])
+REFERENCES [dbo].[Öðretmenler] ([ÖðrentmenId])
+GO
+ALTER TABLE [dbo].[Öðretmen_þube] CHECK CONSTRAINT [FK_Öðretmen_þube_Öðretmenler]
+GO
+ALTER TABLE [dbo].[Öðretmen_þube]  WITH CHECK ADD  CONSTRAINT [FK_Öðretmen_þube_Þubeler] FOREIGN KEY([ÞubeId])
+REFERENCES [dbo].[Þubeler] ([ÞubeId])
+GO
+ALTER TABLE [dbo].[Öðretmen_þube] CHECK CONSTRAINT [FK_Öðretmen_þube_Þubeler]
+GO
+ALTER TABLE [dbo].[Öðretmenler]  WITH CHECK ADD  CONSTRAINT [FK_Öðretmenler_Branþlar] FOREIGN KEY([Ört_BranþId])
+REFERENCES [dbo].[Branþlar] ([BranþId])
+GO
+ALTER TABLE [dbo].[Öðretmenler] CHECK CONSTRAINT [FK_Öðretmenler_Branþlar]
+GO
+/****** Object:  StoredProcedure [dbo].[spCreateAndListStudent]    Script Date: 15.07.2022 18:24:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[spCreateAndListStudent]
+@StudentName nvarchar(20),
+@StudentSurname nvarchar(20),
+@StudentNumber varchar(4)
+AS
+BEGIN
+	insert into Öðrenciler(Ögr_Adý,Ögr_Soyadý,Ögr_No)
+	values(@StudentName,@StudentSurname,@StudentNumber)
+
+	Select * from Öðrenciler
+	
+END
+GO
